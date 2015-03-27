@@ -83,7 +83,7 @@ static const struct file_operations mem_block_fops = {
 	//.write = mem_block_write,
 };
 
-static void mem_block_setup_cdev(struct mem_block *dev, int index)
+static int mem_block_setup_cdev(struct mem_block *dev, int index)
 {
 	int err, devno = MKDEV(mem_block_major, mem_block_minor);
 	
@@ -100,6 +100,7 @@ static void mem_block_setup_cdev(struct mem_block *dev, int index)
 	if (err) 
 		pr_debug("[MEM_BLOCK]: LINE %d can't get major\n",
 			__LINE__);
+	return err;
 }
 
 static int __init mem_block_init(void)
@@ -113,11 +114,18 @@ static int __init mem_block_init(void)
 		return res;
 	}
 
-	mem_block_setup_cdev(&my_device, 0);
+	if(!mem_block_setup_cdev(&my_device, 0))
+		goto setup_failed;
 
 	pr_debug("[%s] LINE %d, regitster mem_block success\n",
 			__func__, __LINE__);
 	return res;
+
+setup_failed:
+	pr_debug("[%s] LINE %d, regitster mem_block dailed\n",
+			__func__, __LINE__);
+	return -1;
+
 }
 
 static void __exit mem_block_exit(void)

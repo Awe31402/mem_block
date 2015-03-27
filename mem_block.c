@@ -38,15 +38,12 @@ void write_mem_block_timer(unsigned long arg)
 	struct mem_block *dev = (struct mem_block *) arg;
 
 	/* first write to local buffer to checkout the write lenth*/
-	write_len = sprintf(buf, 
+	write_len = sprintf(dev->buf, 
 			"processor ID: %d, comm: %s\njiffie: %ld\n",
 			smp_processor_id(), current->comm, jiffies);
 
-	/* if there's enough space, write it to device buffer */
-	if((MEM_SIZE - strlen(dev->buf)) > write_len) {
-		strcat(dev->buf, buf);
-		dev->read_ptr += write_len;
-	}
+	dev->read_ptr = write_len;
+	
 	dev->timer.expires = jiffies + DELAY * HZ;
 	add_timer(&dev->timer);
 }
